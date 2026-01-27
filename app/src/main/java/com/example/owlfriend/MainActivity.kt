@@ -10,7 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.owlfriend.domain.Session
+import com.example.owlfriend.domain.Subject
+import com.example.owlfriend.domain.Task
 import com.example.owlfriend.presentation.subject.SubjectScreen
+import com.example.owlfriend.presentation.task.TaskScreen
 import com.example.owlfriend.presentation.theme.OwlFriendTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -23,9 +27,67 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OwlFriendTheme {
-                SubjectScreen()
+                TaskScreen()
             }
         }
+    }
+
+
+    companion object {
+        val subjects = listOf(
+            Subject("English", 10f, colors = Subject.subjectCardColors[0]),
+            Subject("Physics", 10f, colors = Subject.subjectCardColors[1]),
+            Subject("Maths", 10f, colors = Subject.subjectCardColors[2]),
+            Subject("Geology", 10f, colors = Subject.subjectCardColors[3]),
+            Subject("Fine Arts", 10f, colors = Subject.subjectCardColors[4]),
+        )
+
+
+        val tasks = listOf(
+            Task(title = "Prepare notes", "", 0L, 0, relatedToSubject = "", false, 0, 1),
+            Task(title = "Do homework", "", 0L, 1, relatedToSubject = "", true, 0, 1),
+            Task(title = "Go coaching", "", 0L, 2, relatedToSubject = "", false, 0, 1),
+            Task(title = "Assignments", "", 0L, 0, relatedToSubject = "", false, 0, 1),
+            Task(title = "Write poem", "", 0L, 1, relatedToSubject = "", false, 0, 1)
+        )
+
+        val sessions = listOf(
+            Session(
+                relatedToSubject = "English",
+                date = 0L,
+                duration = 0.5f,
+                sessionSubjectId = 0,
+                sessionId = 0
+            ),
+            Session(
+                relatedToSubject = "Physics",
+                date = 0L,
+                duration = 2f,
+                sessionSubjectId = 0,
+                sessionId = 0
+            ),
+            Session(
+                relatedToSubject = "Maths",
+                date = 0L,
+                duration = 1f,
+                sessionSubjectId = 0,
+                sessionId = 0
+            ),
+            Session(
+                relatedToSubject = "English",
+                date = 0L,
+                duration = 0f,
+                sessionSubjectId = 0,
+                sessionId = 0
+            ),
+            Session(
+                relatedToSubject = "English",
+                date = 0L,
+                duration = 1.25f,
+                sessionSubjectId = 0,
+                sessionId = 0
+            ),
+        )
     }
 }
 
