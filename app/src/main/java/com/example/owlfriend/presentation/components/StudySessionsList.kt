@@ -37,6 +37,7 @@ fun LazyListScope.studySessionsList(
     sectionTitle: String,
     sessions: List<Session>,
     emptyListText: String = "No tasks existed",
+    onDeleteIconClick: () -> Unit
 ) {
     item {
         Text(
@@ -75,7 +76,7 @@ fun LazyListScope.studySessionsList(
         StudySessionCard(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             session = session,
-            onDeleteIconClick = { /*TODO*/}
+            onDeleteIconClick = onDeleteIconClick
         )
     }
 }
