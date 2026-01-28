@@ -97,7 +97,7 @@ private fun SubjectScreen(
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
     var subjectName by remember { mutableStateOf("") }
     var goalHours by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(Subject.subjectCardColors.random()) }
+    var selectedColor by remember { mutableStateOf(MainActivity.subjectCardColors.random()) }
 
     AddSubjectDialog(
         isAddSubjectDialogOpen,

@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +38,7 @@ fun LazyListScope.studySessionsList(
     sectionTitle: String,
     sessions: List<Session>,
     emptyListText: String = "No tasks existed",
-    onDeleteIconClick: () -> Unit
+    onDeleteIconClick: (Session) -> Unit
 ) {
     item {
         Text(
@@ -76,7 +77,7 @@ fun LazyListScope.studySessionsList(
         StudySessionCard(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             session = session,
-            onDeleteIconClick = onDeleteIconClick
+            onDeleteIconClick =  { onDeleteIconClick(session) }
         )
     }
 }
@@ -86,11 +87,13 @@ fun LazyListScope.studySessionsList(
 private fun StudySessionCard(
     modifier: Modifier = Modifier,
     session: Session,
-    onDeleteIconClick: () -> Unit
+    onDeleteIconClick: (Session) -> Unit
 ) {
-    ElevatedCard( modifier = modifier.clickable{}) {
+    Card( modifier = modifier) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 Text(text = session.relatedToSubject,
@@ -104,7 +107,7 @@ private fun StudySessionCard(
             }
             Spacer(Modifier.weight(1f))
             Text(text = "${session.duration} hr", style = MaterialTheme.typography.bodySmall)
-            IconButton(onClick = onDeleteIconClick) {
+            IconButton(onClick = { onDeleteIconClick(session) }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Session"

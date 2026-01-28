@@ -33,7 +33,7 @@ fun LazyListScope.tasksList(
     tasks: List<Task>,
     emptyListText: String = "No tasks existed",
     onTaskCardClick: (Int?) -> Unit,
-    onCheckBoxClick:  (Task?) -> Unit,
+    onCheckBoxClick:  (Task) -> Unit,
 ) {
     item {
         Text(
@@ -71,7 +71,7 @@ fun LazyListScope.tasksList(
     items(tasks) { task ->
         TaskCard(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             task = task,
-            onCheckBoxClick = { /*TODO*/})
+            onCheckBoxClick = {onCheckBoxClick})
     }
 }
 
@@ -81,7 +81,7 @@ private fun TaskCard(
     task: Task,
     onCheckBoxClick: () -> Unit
 ) {
-    ElevatedCard( modifier = modifier.clickable{}) {
+    ElevatedCard( modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically
         ) {

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.owlfriend.MainActivity
 import com.example.owlfriend.domain.Subject
 
 @Composable
@@ -73,7 +74,7 @@ fun AddSubjectDialog(
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Subject.subjectCardColors.forEach { colors ->
+                        MainActivity.subjectCardColors.forEach { colors ->
                             Box(
                                 modifier = Modifier
                                     .size(24.dp)

@@ -10,6 +10,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 
 enum class Priority(val title:String, val color: Color, val value : Int) {
@@ -32,6 +33,9 @@ fun Long?.changeMillisToDateString() : String {
     return date.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
 }
 
+fun Long.toHours(): Float {
+    return (this / 3600f * 100).roundToInt() / 100f
+}
 // Use this in util/Common.kt
 @OptIn(ExperimentalMaterial3Api::class)
 object CurrentOrFutureSelectableDates: SelectableDates {
