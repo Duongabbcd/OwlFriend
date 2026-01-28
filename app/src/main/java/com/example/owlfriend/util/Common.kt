@@ -1,9 +1,15 @@
 package com.example.owlfriend.util
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
 import androidx.compose.ui.graphics.Color
 import com.example.owlfriend.presentation.theme.Green
 import com.example.owlfriend.presentation.theme.Orange
 import com.example.owlfriend.presentation.theme.Red
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 enum class Priority(val title:String, val color: Color, val value : Int) {
@@ -13,5 +19,29 @@ enum class Priority(val title:String, val color: Color, val value : Int) {
 
     companion object {
         fun fromInt(value: Int) = values().firstOrNull {it.value == value} ?: MEDIUM
+    }
+}
+
+
+fun Long?.changeMillisToDateString() : String {
+    val date: LocalDate = this?.let {
+        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+    } ?: LocalDate.now()
+
+
+    return date.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+}
+
+// Use this in util/Common.kt
+@OptIn(ExperimentalMaterial3Api::class)
+object CurrentOrFutureSelectableDates: SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        val currentDateMillis =
+            LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        return utcTimeMillis >= currentDateMillis
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return year >= LocalDate.now().year
     }
 }

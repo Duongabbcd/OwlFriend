@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.owlfriend.MainActivity
 import com.example.owlfriend.domain.Subject
 import com.example.owlfriend.presentation.components.AddSubjectDialog
@@ -48,10 +49,44 @@ import com.example.owlfriend.presentation.components.CountCard
 import com.example.owlfriend.presentation.components.DeleteDialog
 import com.example.owlfriend.presentation.components.studySessionsList
 import com.example.owlfriend.presentation.components.tasksList
+import com.example.owlfriend.presentation.destinations.TaskScreenRouteDestination
+import com.example.owlfriend.presentation.session.SessionScreenViewModel
+import com.example.owlfriend.presentation.task.TaskScreenNavArgs
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+data class SubjectScreenNavArgs(
+    val subjectId: Int
+)
+
+@Destination(navArgsDelegate = SubjectScreenNavArgs::class)
+@Composable
+fun SubjectScreenRoute(
+    navigator: DestinationsNavigator
+) {
+    val viewModel: SubjectViewModel = hiltViewModel()
+
+
+    SubjectScreen(
+        onBackButtonClick = {navigator.navigateUp()},
+        onAddTaskButtonClick =  {
+            val navArgs = TaskScreenNavArgs(taskId = null, -1)
+            navigator.navigate(TaskScreenRouteDestination(navArgs))
+        },
+        onTaskCardClick = { taskId ->
+            val navArgs = TaskScreenNavArgs(taskId = taskId, null)
+            navigator.navigate(TaskScreenRouteDestination(navArgs))
+        },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubjectScreen() {
+private fun SubjectScreen(
+    onBackButtonClick: () -> Unit,
+    onAddTaskButtonClick: () -> Unit,
+    onTaskCardClick: (Int?) -> Unit
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val listState = rememberLazyListState()
     val isFABExpanded by remember {
@@ -81,7 +116,7 @@ fun SubjectScreen() {
     DeleteDialog(
         isOpen = isDeleteSessionDialogOpen,
         title = "Delete Subject?",
-        bodyText = "Are you sure, you want to delete this subject? All related " +
+        bodyText = "Are you sure you want to delete this subject? All related " +
                 "tasks and study sessions will be permanetnly removed. This action can not be undone.",
         onDismissRequest = { isDeleteSessionDialogOpen = false },
         onConfirmButtonClick = {
@@ -95,7 +130,7 @@ fun SubjectScreen() {
         topBar = {
             SubjectScreenTopBar(
                 title = "English",
-                onBackButtonClick = {},
+                onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { /*TODO*/ },
                 onEditButtonClick = {},
                 scrollBehavior = scrollBehavior
@@ -103,7 +138,7 @@ fun SubjectScreen() {
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = onAddTaskButtonClick,
                 icon = { Icon(imageVector = Icons.Default.Add, "Add") },
                 text = { Text("Add Task") },
                 expanded = isFABExpanded
@@ -130,7 +165,7 @@ fun SubjectScreen() {
                         "Click the + button to add new task.",
                 tasks = MainActivity.tasks,
                 onCheckBoxClick = {},
-                onTaskCardClick = {}
+                onTaskCardClick = onTaskCardClick
             )
 
             item {

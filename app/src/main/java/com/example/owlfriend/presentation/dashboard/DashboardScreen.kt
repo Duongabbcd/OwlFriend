@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,21 +36,57 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.owlfriend.MainActivity
 import com.example.owlfriend.R
-import com.example.owlfriend.domain.Session
 import com.example.owlfriend.domain.Subject
-import com.example.owlfriend.domain.Task
 import com.example.owlfriend.presentation.components.AddSubjectDialog
 import com.example.owlfriend.presentation.components.CountCard
 import com.example.owlfriend.presentation.components.DeleteDialog
 import com.example.owlfriend.presentation.components.SubjectCard
 import com.example.owlfriend.presentation.components.studySessionsList
 import com.example.owlfriend.presentation.components.tasksList
+import com.example.owlfriend.presentation.destinations.SessionScreenRouteDestination
+import com.example.owlfriend.presentation.destinations.SubjectScreenRouteDestination
+import com.example.owlfriend.presentation.destinations.TaskScreenRouteDestination
+import com.example.owlfriend.presentation.subject.SubjectScreenNavArgs
+import com.example.owlfriend.presentation.task.TaskScreenNavArgs
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@Destination(start = true)
+@Composable
+fun DashboardScreenRoute(
+    navigator: DestinationsNavigator
+) {
+
+    val viewModel: DashboardViewModel = hiltViewModel()
+
+    DashboardScreen(
+        onSubjectCardClick = { subjectId ->
+                subjectId?.let {
+                    val navArg = SubjectScreenNavArgs(subjectId = subjectId)
+                    navigator.navigate(SubjectScreenRouteDestination(navArg))
+                }
+        } ,
+        onTaskCardClick = { taskId ->
+            taskId?.let {
+                val navArg = TaskScreenNavArgs(taskId = taskId, null)
+                navigator.navigate(TaskScreenRouteDestination(navArg))
+            }
+        },
+        onStartSessionButtonClick = {
+            navigator.navigate(SessionScreenRouteDestination())
+        }
+    )
+}
 
 @Composable
-fun DashboardScreen() {
+private fun DashboardScreen(
+    onSubjectCardClick: (Int?) -> Unit,
+    onTaskCardClick: (Int?) -> Unit,
+    onStartSessionButtonClick: () -> Unit,
+) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -76,7 +111,7 @@ fun DashboardScreen() {
     DeleteDialog(
         isOpen = isDeleteSessionDialogOpen,
         title = "Delete Session",
-        bodyText = "Are you sure, you want to delete this session? Your studied hours will be reduced " +
+        bodyText = "Are you sure you want to delete this session? Your studied hours will be reduced " +
                 "by this session time. This action can not be undone",
         onDismissRequest = { isDeleteSessionDialogOpen = false },
         onConfirmButtonClick = {
@@ -105,12 +140,13 @@ fun DashboardScreen() {
                 SubjectCardsSection(
                     modifier = Modifier.fillMaxWidth(),
                     subjectList = MainActivity.subjects,
-                    onAddIconClicked = { isAddSubjectDialogOpen = true }
+                    onAddIconClicked = { isAddSubjectDialogOpen = true },
+                    onSubjectCardClick = onSubjectCardClick
                 )
             }
             item {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = onStartSessionButtonClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp, vertical = 20.dp)
@@ -125,7 +161,7 @@ fun DashboardScreen() {
                         "Click the + button in subject screen to add new task.",
                 tasks = MainActivity.tasks,
                 onCheckBoxClick = {},
-                onTaskCardClick = {}
+                onTaskCardClick = onTaskCardClick
             )
             studySessionsList(
                 "RECENT STUDY SESSIONS",
@@ -169,7 +205,8 @@ private fun SubjectCardsSection(
     modifier: Modifier,
     subjectList: List<Subject>,
     emptyListText: String = "You don't have any subject.\n Click the + button to add new subjects",
-    onAddIconClicked: () -> Unit
+    onAddIconClicked: () -> Unit,
+    onSubjectCardClick: (Int?) -> Unit,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -211,7 +248,7 @@ private fun SubjectCardsSection(
                 SubjectCard(
                     subjectName = subject.name,
                     gradientColors = subject.colors,
-                    onClick = {}
+                    onClick = { onSubjectCardClick(subject.subjectId) }
                 )
 
             }

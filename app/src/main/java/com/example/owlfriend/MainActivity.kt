@@ -13,9 +13,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.owlfriend.domain.Session
 import com.example.owlfriend.domain.Subject
 import com.example.owlfriend.domain.Task
-import com.example.owlfriend.presentation.subject.SubjectScreen
-import com.example.owlfriend.presentation.task.TaskScreen
+import com.example.owlfriend.presentation.NavGraph
+import com.example.owlfriend.presentation.NavGraphs
 import com.example.owlfriend.presentation.theme.OwlFriendTheme
+import com.ramcosta.composedestinations.DestinationsNavHost
 
 @OptIn(ExperimentalFoundationApi::class)
 class MainActivity : ComponentActivity() {
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OwlFriendTheme {
-                TaskScreen()
+                DestinationsNavHost(navGraph = NavGraphs.root)
             }
         }
     }
@@ -35,11 +36,11 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         val subjects = listOf(
-            Subject("English", 10f, colors = Subject.subjectCardColors[0]),
-            Subject("Physics", 10f, colors = Subject.subjectCardColors[1]),
-            Subject("Maths", 10f, colors = Subject.subjectCardColors[2]),
-            Subject("Geology", 10f, colors = Subject.subjectCardColors[3]),
-            Subject("Fine Arts", 10f, colors = Subject.subjectCardColors[4]),
+            Subject("English", 10f, colors = Subject.subjectCardColors[0], 1),
+            Subject("Physics", 10f, colors = Subject.subjectCardColors[1], 2),
+            Subject("Maths", 10f, colors = Subject.subjectCardColors[2], 3),
+            Subject("Geology", 10f, colors = Subject.subjectCardColors[3], 4),
+            Subject("Fine Arts", 10f, colors = Subject.subjectCardColors[4], 5),
         )
 
 
