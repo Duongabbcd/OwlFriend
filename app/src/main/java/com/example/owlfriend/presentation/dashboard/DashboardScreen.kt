@@ -270,13 +270,13 @@ private fun SubjectCardsSection(
 
         if (subjectList.isEmpty()) {
             Image(
-                modifier = Modifier.size(120.dp),
+                modifier = Modifier.size(120.dp).align(Alignment.CenterHorizontally),
                 painter = painterResource(R.drawable.img_books),
                 contentDescription = emptyListText
             )
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "",
+                text = emptyListText,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
                 textAlign = TextAlign.Center

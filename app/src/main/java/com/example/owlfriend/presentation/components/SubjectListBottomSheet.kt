@@ -32,26 +32,30 @@ fun SubjectListBottomSheet(
     onSubjectClicked: (Subject) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    if(isOpen) {
-        ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismissRequest, dragHandle = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                BottomSheetDefaults.DragHandle()
-                Text(text = bottomSheetTitle)
-                Spacer(Modifier.height(10.dp))
-                Divider()
-            }
-        }) {
+    if (isOpen) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = onDismissRequest,
+            dragHandle = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BottomSheetDefaults.DragHandle()
+                    Text(text = bottomSheetTitle)
+                    Spacer(Modifier.height(10.dp))
+                    Divider()
+                }
+            }) {
             LazyColumn(contentPadding = PaddingValues(16.dp)) {
                 items(subjects) { subject ->
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onSubjectClicked(subject)
-                        }
-                        .padding(8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onSubjectClicked(subject)
+                            }
+                            .padding(8.dp)) {
                         Text(text = subject.name)
                     }
                 }

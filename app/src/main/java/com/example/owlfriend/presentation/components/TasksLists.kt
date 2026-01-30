@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.owlfriend.R
 import com.example.owlfriend.domain.Task
 import com.example.owlfriend.util.Priority
+import com.example.owlfriend.util.changeMillisToDateString
 
 fun LazyListScope.tasksList(
     sectionTitle: String,
@@ -71,7 +72,8 @@ fun LazyListScope.tasksList(
     items(tasks) { task ->
         TaskCard(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             task = task,
-            onCheckBoxClick = {onCheckBoxClick})
+            onCheckBoxClick = {onCheckBoxClick},    onClick = {onTaskCardClick(task.taskId)})
+
     }
 }
 
@@ -79,9 +81,10 @@ fun LazyListScope.tasksList(
 private fun TaskCard(
     modifier: Modifier = Modifier,
     task: Task,
-    onCheckBoxClick: () -> Unit
+    onCheckBoxClick: () -> Unit,
+    onClick: () -> Unit
 ) {
-    ElevatedCard( modifier = modifier) {
+    ElevatedCard( modifier = modifier.clickable{onClick()}) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically
         ) {
@@ -101,7 +104,7 @@ private fun TaskCard(
                     } else TextDecoration.None)
 
                 Spacer(Modifier.height(4.dp))
-                Text(text = "${task.dueDate}",
+                Text(text = task.dueDate.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodySmall)
             }
         }

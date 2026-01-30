@@ -11,6 +11,7 @@ import com.example.owlfriend.domain.Task
 import com.example.owlfriend.domain.repository.SessionRepository
 import com.example.owlfriend.domain.repository.SubjectRepository
 import com.example.owlfriend.domain.repository.TaskRepository
+import com.example.owlfriend.presentation.navArgs
 import com.example.owlfriend.util.SnackbarEvent
 import com.example.owlfriend.util.toHours
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -155,6 +156,7 @@ class SubjectViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val currentSubjectId = state.value.currentSubjectId
+                println("currentSubjectId: $currentSubjectId")
                 if (currentSubjectId != null) {
                     withContext(Dispatchers.IO) {
                         subjectRepository.deleteSubject(subjectId = currentSubjectId)

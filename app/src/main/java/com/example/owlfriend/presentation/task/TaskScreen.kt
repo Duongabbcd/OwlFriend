@@ -27,11 +27,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,18 +45,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.owlfriend.MainActivity
 import com.example.owlfriend.presentation.components.DeleteDialog
 import com.example.owlfriend.presentation.components.SubjectListBottomSheet
 import com.example.owlfriend.presentation.components.TaskCheckBox
 import com.example.owlfriend.presentation.components.TaskDatePicker
-import com.example.owlfriend.presentation.session.SessionScreenViewModel
 import com.example.owlfriend.presentation.theme.Red
 import com.example.owlfriend.util.CurrentOrFutureSelectableDates
 import com.example.owlfriend.util.Priority
+import com.example.owlfriend.util.SnackbarEvent
 import com.example.owlfriend.util.changeMillisToDateString
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -67,8 +72,12 @@ data class TaskScreenNavArgs(
 @Composable
 fun TaskScreenRoute(navigator: DestinationsNavigator) {
     val viewModel: TaskViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     TaskScreen(
+        state = state,
+        snackBarEvent = viewModel.snackbarEventFlow,
+        onEvent = viewModel::onEvent,
         onBackButtonClick = { navigator.navigateUp() }
     )
 }
@@ -77,7 +86,10 @@ fun TaskScreenRoute(navigator: DestinationsNavigator) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskScreen(
-    onBackButtonClick: () -> Unit
+    state: TaskState,
+    snackBarEvent: SharedFlow<SnackbarEvent>,
+    onEvent: (TaskEvent) -> Unit,
+    onBackButtonClick: () -> Unit,
 ) {
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -89,17 +101,32 @@ private fun TaskScreen(
 
     val sheetState = rememberModalBottomSheetState()
     var isBottomSheetOpen by remember { mutableStateOf(false) }
-
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     var taskTitleError by rememberSaveable { mutableStateOf<String?>(null) }
     taskTitleError = when {
-        title.isBlank() -> "Please enter task title."
-        title.length < 4 -> "Task title is too short."
-        title.length > 30 -> "Task title is too long."
+        state.title.isBlank() -> "Please enter task title."
+        state.title.length < 4 -> "Task title is too short."
+        state.title.length > 30 -> "Task title is too long."
         else -> null
+    }
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = true) {
+        snackBarEvent.collectLatest { event ->
+            when (event) {
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackBarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+
+                SnackbarEvent.NavigateUp -> {
+                    onBackButtonClick()
+                }
+            }
+        }
     }
 
     DeleteDialog(
@@ -109,6 +136,7 @@ private fun TaskScreen(
                 "This action can not be undone.",
         onDismissRequest = { isDeleteDialogOpen = false },
         onConfirmButtonClick = {
+            onEvent(TaskEvent.DeleteTask)
             isDeleteDialogOpen = false
         }
     )
@@ -117,20 +145,25 @@ private fun TaskScreen(
         state = datePickerState,
         isOpen = isDatePickerDialogOpen,
         onDismissRequest = { isDatePickerDialogOpen = false },
-        onConfirmButtonClicked = { isDatePickerDialogOpen = false }
+        onConfirmButtonClicked = {
+            onEvent(TaskEvent.OnDateChange(millis = datePickerState.selectedDateMillis))
+            isDatePickerDialogOpen = false
+        }
     )
 
     SubjectListBottomSheet(
         sheetState = sheetState,
         isOpen = isBottomSheetOpen,
-        subjects = MainActivity.subjects,
-        onSubjectClicked = {
+        subjects = state.subjects,
+        onDismissRequest = {
+            isBottomSheetOpen = false
+        },
+        onSubjectClicked = { subject ->
+            println("onSubjectClicked: $subject")
             scope.launch { sheetState.hide() }.invokeOnCompletion {
                 if (!sheetState.isVisible) isBottomSheetOpen = false
             }
-        },
-        onDismissRequest = {
-            isBottomSheetOpen = false
+            onEvent(TaskEvent.OnRelatedSubjectSelect(subject = subject))
         })
 
 
@@ -139,8 +172,8 @@ private fun TaskScreen(
             TaskScreenTopBar(
                 isTaskExist = true,
                 isComplete = false,
-                checkBoxBorderColor = Red,
-                onCheckBoxClick = {},
+                checkBoxBorderColor = state.priority.color,
+                onCheckBoxClick = { onEvent(TaskEvent.OnIsCompleteChange) },
                 onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { isDeleteDialogOpen = true },
             )
@@ -155,18 +188,18 @@ private fun TaskScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = title,
-                onValueChange = { title = it },
+                value = state.title,
+                onValueChange = { onEvent(TaskEvent.OnTitleChange(it)) },
                 label = { Text(text = "Title") },
                 singleLine = true,
-                isError = taskTitleError != null && title.isNotBlank(),
+                isError = taskTitleError != null && state.title.isNotBlank(),
                 supportingText = { Text(text = taskTitleError.orEmpty()) }
             )
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = description,
-                onValueChange = { description = it },
+                value = state.description,
+                onValueChange = { onEvent(TaskEvent.OnDescriptionChange(it)) },
                 label = { Text(text = "Description") },
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -199,10 +232,12 @@ private fun TaskScreen(
                         modifier = Modifier.weight(1f),
                         label = priority.title,
                         priority.color,
-                        borderColor = if (priority == Priority.MEDIUM) Color.White else Color.Transparent,
-                        labelColor = if (priority == Priority.MEDIUM) Color.White else Color.White.copy(
+                        borderColor = if (priority == state.priority) Color.White else Color.Transparent,
+                        labelColor = if (priority ==  state.priority) Color.White else Color.White.copy(
                             0.7f
-                        ), onClick = {}
+                        ), onClick = {
+                            onEvent(TaskEvent.OnPriorityChange(priority))
+                        }
                     )
                 }
             }
@@ -227,7 +262,7 @@ private fun TaskScreen(
 
             Button(
                 enabled = taskTitleError == null,
-                onClick = {},
+                onClick = { onEvent(TaskEvent.SaveTask)},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp)

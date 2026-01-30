@@ -177,8 +177,8 @@ private fun SubjectScreen(
             SubjectScreenTopBar(
                 title = state.subjectName,
                 onBackButtonClick = onBackButtonClick,
-                onDeleteButtonClick = { /*TODO*/ },
-                onEditButtonClick = {},
+                onDeleteButtonClick = { isDeleteSubjectDialogOpen = true },
+                onEditButtonClick = {isAddSubjectDialogOpen = true},
                 scrollBehavior = scrollBehavior
             )
         },
